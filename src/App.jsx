@@ -6,8 +6,22 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  const [favorites, setFavorites] = useState([])
-  const [blockedPokemons, setBlockedPokemons] = useState([])
+  const [favorites, setFavorites] = useState(() => {
+    const storedFavorites = window.localStorage.getItem('pokemon-favorites')
+    return storedFavorites ? JSON.parse(storedFavorites) : []
+  })
+  const [blockedPokemons, setBlockedPokemons] = useState(() => {
+    const storedBlocked = window.localStorage.getItem('pokemon-blocked')
+    return storedBlocked ? JSON.parse(storedBlocked) : []
+  })
+
+  useEffect(() => {
+    window.localStorage.setItem('pokemon-favorites', JSON.stringify(favorites))
+  }, [favorites])
+
+  useEffect(() => {
+    window.localStorage.setItem('pokemon-blocked', JSON.stringify(blockedPokemons))
+  }, [blockedPokemons])
 
   useEffect(() => {
     const loadPokemons = async () => {
