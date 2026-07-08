@@ -7,6 +7,7 @@ function App() {
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [favorites, setFavorites] = useState([])
+  const [blockedPokemons, setBlockedPokemons] = useState([])
 
   useEffect(() => {
     const loadPokemons = async () => {
@@ -42,8 +43,10 @@ function App() {
     loadPokemons()
   }, [])
 
-  const filteredPokemons = pokemonList.filter((pokemon) =>
-    pokemon.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredPokemons = pokemonList.filter(
+    (pokemon) =>
+      !blockedPokemons.some((blocked) => blocked.id === pokemon.id) &&
+      pokemon.name.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   const fallbackImage = `data:image/svg+xml;utf8,${encodeURIComponent(`
@@ -77,6 +80,22 @@ function App() {
     })
   }
 
+  const toggleBlocked = (pokemon) => {
+    setBlockedPokemons((currentBlocked) => {
+      const exists = currentBlocked.some((blocked) => blocked.id === pokemon.id)
+
+      if (exists) {
+        return currentBlocked.filter((blocked) => blocked.id !== pokemon.id)
+      }
+
+      return [...currentBlocked, pokemon]
+    })
+
+    setFavorites((currentFavorites) =>
+      currentFavorites.filter((favorite) => favorite.id !== pokemon.id),
+    )
+  }
+
   return (
     <main className="app-shell">
       <section className="hero-section">
@@ -90,15 +109,32 @@ function App() {
       </section>
 
       {!loading && !error && (
-        <label className="search-box">
-          <span>Buscar Pokémon</span>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Ej: pikachu"
-          />
-        </label>
+        <>
+          <label className="search-box">
+            <span>Buscar Pokémon</span>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Ej: pikachu"
+            />
+          </label>
+
+          <div className="summary-bar" aria-label="Resumen de Pokémon">
+            <div className="summary-item">
+              <span className="summary-label">Total</span>
+              <strong>{pokemonList.length}</strong>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Favoritos</span>
+              <strong>{favorites.length}</strong>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Bloqueados</span>
+              <strong>{blockedPokemons.length}</strong>
+            </div>
+          </div>
+        </>
       )}
 
       {loading && <p className="status">Cargando Pokémon...</p>}
@@ -113,14 +149,24 @@ function App() {
 
               return (
                 <article className="pokemon-card" key={pokemon.id}>
-                  <button
-                    type="button"
-                    className={`favorite-button ${isFavorite ? 'active' : ''}`}
-                    onClick={() => toggleFavorite(pokemon)}
-                    aria-label={isFavorite ? `Quitar ${pokemon.name} de favoritos` : `Agregar ${pokemon.name} a favoritos`}
-                  >
-                    {isFavorite ? '★' : '☆'}
-                  </button>
+                  <div className="card-actions">
+                    <button
+                      type="button"
+                      className={`favorite-button ${isFavorite ? 'active' : ''}`}
+                      onClick={() => toggleFavorite(pokemon)}
+                      aria-label={isFavorite ? `Quitar ${pokemon.name} de favoritos` : `Agregar ${pokemon.name} a favoritos`}
+                    >
+                      {isFavorite ? '★' : '☆'}
+                    </button>
+                    <button
+                      type="button"
+                      className={`block-button ${blockedPokemons.some((blocked) => blocked.id === pokemon.id) ? 'active' : ''}`}
+                      onClick={() => toggleBlocked(pokemon)}
+                      aria-label={blockedPokemons.some((blocked) => blocked.id === pokemon.id) ? `Desbloquear ${pokemon.name}` : `Bloquear ${pokemon.name}`}
+                    >
+                      {blockedPokemons.some((blocked) => blocked.id === pokemon.id) ? '🔓' : '🚫'}
+                    </button>
+                  </div>
                   <img
                     src={image}
                     alt={pokemon.name}
@@ -142,39 +188,63 @@ function App() {
           </section>
 
           <aside className="favorites-panel">
-            <h2>Favoritos</h2>
-            {favorites.length === 0 ? (
-              <p className="favorites-empty">Aún no has marcado favoritos.</p>
-            ) : (
-              <ul className="favorites-list">
-                {favorites.map((pokemon) => {
-                  const image = getPokemonImage(pokemon)
+            <section className="panel-section">
+              <h2>Favoritos</h2>
+              {favorites.length === 0 ? (
+                <p className="favorites-empty">Aún no has marcado favoritos.</p>
+              ) : (
+                <ul className="favorites-list">
+                  {favorites.map((pokemon) => {
+                    const image = getPokemonImage(pokemon)
 
-                  return (
-                    <li key={pokemon.id} className="favorite-item">
-                      <div className="favorite-item-content">
-                        <img
-                          src={image}
-                          alt={pokemon.name}
-                          className="favorite-thumb"
-                          onError={(event) => {
-                            event.currentTarget.src = fallbackImage
-                          }}
-                        />
-                        <span>{pokemon.name}</span>
-                      </div>
+                    return (
+                      <li key={pokemon.id} className="favorite-item">
+                        <div className="favorite-item-content">
+                          <img
+                            src={image}
+                            alt={pokemon.name}
+                            className="favorite-thumb"
+                            onError={(event) => {
+                              event.currentTarget.src = fallbackImage
+                            }}
+                          />
+                          <span>{pokemon.name}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => toggleFavorite(pokemon)}
+                          aria-label={`Quitar ${pokemon.name} de favoritos`}
+                        >
+                          ✕
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </section>
+
+            <section className="panel-section">
+              <h2>Bloqueados</h2>
+              {blockedPokemons.length === 0 ? (
+                <p className="favorites-empty">No hay Pokémon bloqueados.</p>
+              ) : (
+                <ul className="favorites-list">
+                  {blockedPokemons.map((pokemon) => (
+                    <li key={pokemon.id} className="favorite-item blocked-item">
+                      <span>{pokemon.name}</span>
                       <button
                         type="button"
-                        onClick={() => toggleFavorite(pokemon)}
-                        aria-label={`Quitar ${pokemon.name} de favoritos`}
+                        onClick={() => toggleBlocked(pokemon)}
+                        aria-label={`Desbloquear ${pokemon.name}`}
                       >
                         ✕
                       </button>
                     </li>
-                  )
-                })}
-              </ul>
-            )}
+                  ))}
+                </ul>
+              )}
+            </section>
           </aside>
         </div>
       )}
