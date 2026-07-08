@@ -6,6 +6,7 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [favorites, setFavorites] = useState([])
 
   useEffect(() => {
     const loadPokemons = async () => {
@@ -64,6 +65,18 @@ function App() {
     return candidates.find(Boolean) || fallbackImage
   }
 
+  const toggleFavorite = (pokemon) => {
+    setFavorites((currentFavorites) => {
+      const exists = currentFavorites.some((favorite) => favorite.id === pokemon.id)
+
+      if (exists) {
+        return currentFavorites.filter((favorite) => favorite.id !== pokemon.id)
+      }
+
+      return [...currentFavorites, pokemon]
+    })
+  }
+
   return (
     <main className="app-shell">
       <section className="hero-section">
@@ -92,31 +105,78 @@ function App() {
       {error && <p className="status error">{error}</p>}
 
       {!loading && !error && (
-        <section className="pokemon-grid" aria-label="Listado de Pokémon">
-          {filteredPokemons.map((pokemon) => {
-            const image = getPokemonImage(pokemon)
+        <div className="content-layout">
+          <section className="pokemon-grid" aria-label="Listado de Pokémon">
+            {filteredPokemons.map((pokemon) => {
+              const image = getPokemonImage(pokemon)
+              const isFavorite = favorites.some((favorite) => favorite.id === pokemon.id)
 
-            return (
-              <article className="pokemon-card" key={pokemon.id}>
-                <img
-                  src={image}
-                  alt={pokemon.name}
-                  className="pokemon-image"
-                  onError={(event) => {
-                    event.currentTarget.src = fallbackImage
-                  }}
-                />
-                <div className="pokemon-info">
-                  <p className="pokemon-id">#{pokemon.id.toString().padStart(3, '0')}</p>
-                  <h2>{pokemon.name}</h2>
-                  <p className="pokemon-types">
-                    {pokemon.types.map((type) => type.type.name).join(' • ')}
-                  </p>
-                </div>
-              </article>
-            )
-          })}
-        </section>
+              return (
+                <article className="pokemon-card" key={pokemon.id}>
+                  <button
+                    type="button"
+                    className={`favorite-button ${isFavorite ? 'active' : ''}`}
+                    onClick={() => toggleFavorite(pokemon)}
+                    aria-label={isFavorite ? `Quitar ${pokemon.name} de favoritos` : `Agregar ${pokemon.name} a favoritos`}
+                  >
+                    {isFavorite ? '★' : '☆'}
+                  </button>
+                  <img
+                    src={image}
+                    alt={pokemon.name}
+                    className="pokemon-image"
+                    onError={(event) => {
+                      event.currentTarget.src = fallbackImage
+                    }}
+                  />
+                  <div className="pokemon-info">
+                    <p className="pokemon-id">#{pokemon.id.toString().padStart(3, '0')}</p>
+                    <h2>{pokemon.name}</h2>
+                    <p className="pokemon-types">
+                      {pokemon.types.map((type) => type.type.name).join(' • ')}
+                    </p>
+                  </div>
+                </article>
+              )
+            })}
+          </section>
+
+          <aside className="favorites-panel">
+            <h2>Favoritos</h2>
+            {favorites.length === 0 ? (
+              <p className="favorites-empty">Aún no has marcado favoritos.</p>
+            ) : (
+              <ul className="favorites-list">
+                {favorites.map((pokemon) => {
+                  const image = getPokemonImage(pokemon)
+
+                  return (
+                    <li key={pokemon.id} className="favorite-item">
+                      <div className="favorite-item-content">
+                        <img
+                          src={image}
+                          alt={pokemon.name}
+                          className="favorite-thumb"
+                          onError={(event) => {
+                            event.currentTarget.src = fallbackImage
+                          }}
+                        />
+                        <span>{pokemon.name}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => toggleFavorite(pokemon)}
+                        aria-label={`Quitar ${pokemon.name} de favoritos`}
+                      >
+                        ✕
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </aside>
+        </div>
       )}
     </main>
   )

@@ -1,5 +1,8 @@
 .app-shell {
   padding: 2rem;
+  background: linear-gradient(135deg, #0f172a 0%, #111827 45%, #1f2937 100%);
+  min-height: 100vh;
+  color: #f9fafb;
 }
 
 .hero-section {
@@ -12,13 +15,13 @@
   letter-spacing: 0.3em;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--accent);
+  color: #fbbf24;
   margin-bottom: 0.5rem;
 }
 
 .hero-text {
   max-width: 700px;
-  color: var(--text);
+  color: #d1d5db;
 }
 
 .status {
@@ -42,20 +45,29 @@
 
 .search-box span {
   font-weight: 600;
-  color: var(--text-h);
+  color: #f9fafb;
 }
 
 .search-box input {
-  border: 1px solid var(--accent-border);
+  border: 1px solid rgba(251, 191, 36, 0.4);
   border-radius: 999px;
   padding: 0.75rem 1rem;
   font-size: 1rem;
   outline: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111827;
 }
 
 .search-box input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-bg);
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.25);
+}
+
+.content-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 1.5rem;
+  align-items: start;
 }
 
 .pokemon-grid {
@@ -65,16 +77,19 @@
 }
 
 .pokemon-card {
-  background: var(--accent-bg);
-  border: 1px solid var(--accent-border);
+  position: relative;
+  background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 16px;
   padding: 1rem;
-  box-shadow: var(--shadow);
-  transition: transform 0.2s ease;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
 }
 
 .pokemon-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
 }
 
 .pokemon-image {
@@ -86,6 +101,25 @@
   padding: 0.5rem;
 }
 
+.favorite-button {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: #f59e0b;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+.favorite-button.active {
+  background: #fef3c7;
+}
+
 .pokemon-info {
   margin-top: 0.75rem;
   text-align: left;
@@ -93,18 +127,95 @@
 
 .pokemon-id {
   margin: 0 0 0.3rem;
-  color: var(--accent);
+  color: #fbbf24;
   font-weight: 700;
 }
 
 .pokemon-info h2 {
   margin: 0 0 0.4rem;
   text-transform: capitalize;
+  color: #f9fafb;
 }
 
 .pokemon-types {
   margin: 0;
   font-size: 0.95rem;
-  color: var(--text);
+  color: #d1d5db;
   text-transform: capitalize;
+}
+
+.favorites-panel {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+.favorites-panel h2 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  color: #f9fafb;
+}
+
+.favorites-empty {
+  margin: 0;
+  color: #d1d5db;
+}
+
+.favorites-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.favorite-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(255,255,255,0.1));
+  text-transform: capitalize;
+  color: #f9fafb;
+}
+
+.favorite-item-content {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.favorite-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.95);
+  padding: 2px;
+}
+
+.favorite-item button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #c2410c;
+  font-size: 1rem;
+}
+
+@media (max-width: 900px) {
+  .content-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .favorites-panel {
+    position: static;
+  }
 }
